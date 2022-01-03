@@ -172,7 +172,7 @@ class KeyboardLayouter(pcbnew.ActionPlugin):
         x_mm, y_mm = self.__rotate(r, x_mm, y_mm, rx_mm, ry_mm)
 
         if self.params['switch']['move']:
-            sw = self.board.FindModule(self.__sw_ref(ref_id))
+            sw = self.board.FindFootprintByReference(self.__sw_ref(ref_id))
             if sw is not None:
                 sw.SetPosition(pcbnew.wxPointMM(x_mm, y_mm))
                 if self.params['switch']['reverse']:
@@ -181,7 +181,7 @@ class KeyboardLayouter(pcbnew.ActionPlugin):
                     sw.SetOrientationDegrees(r)
 
         if self.params['diode']['move']:
-            diode = self.board.FindModule(self.__diode_ref(ref_id))
+            diode = self.board.FindFootprintByReference(self.__diode_ref(ref_id))
             if diode is not None:
                 diode.SetPosition(pcbnew.wxPointMM(x_mm, y_mm))
                 dx_mm, dy_mm = self.__rotate(r,
@@ -194,7 +194,7 @@ class KeyboardLayouter(pcbnew.ActionPlugin):
                 diode.SetOrientationDegrees(r)
 
         if self.params['led']['move']:
-            led = self.board.FindModule(self.__led_ref(ref_id))
+            led = self.board.FindFootprintByReference(self.__led_ref(ref_id))
             if led is not None:
                 led.SetPosition(pcbnew.wxPointMM(x_mm, y_mm))
                 lx_mm, ly_mm = self.__rotate(r,
@@ -206,7 +206,7 @@ class KeyboardLayouter(pcbnew.ActionPlugin):
                 led.SetOrientationDegrees(r)
 
     def __gui(self):
-        WINDOW_SIZE = (600, 380)
+        WINDOW_SIZE = (600, 580)
         MARGIN_PIX = 10
         INDENT_PIX = 20
 
