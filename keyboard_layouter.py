@@ -62,7 +62,7 @@ class KeyboardLayouter(pcbnew.ActionPlugin):
         self.name = 'Keyboard Layouter Custom(added LEDs)'
         self.category = 'Modify PCB'
         self.description = 'Move parts to the position specified by json'
-        self.__version__ = '0.1.2'
+        self.__version__ = '0.1.3'
 
     def Run(self):
         self.__gui()
@@ -174,7 +174,7 @@ class KeyboardLayouter(pcbnew.ActionPlugin):
         if self.params['switch']['move']:
             sw = self.board.FindFootprintByReference(self.__sw_ref(ref_id))
             if sw is not None:
-                sw.SetPosition(pcbnew.wxPointMM(x_mm, y_mm))
+                sw.SetPosition(pcbnew.VECTOR2I_MM(x_mm, y_mm))
                 if self.params['switch']['reverse']:
                     sw.SetOrientationDegrees(r + 180)
                 else:
@@ -183,11 +183,11 @@ class KeyboardLayouter(pcbnew.ActionPlugin):
         if self.params['diode']['move']:
             diode = self.board.FindFootprintByReference(self.__diode_ref(ref_id))
             if diode is not None:
-                diode.SetPosition(pcbnew.wxPointMM(x_mm, y_mm))
+                diode.SetPosition(pcbnew.VECTOR2I_MM(x_mm, y_mm))
                 dx_mm, dy_mm = self.__rotate(r,
                                              self.params['diode']['offset_x_mm'],
                                              self.params['diode']['offset_y_mm'])
-                diode.Move(pcbnew.wxPointMM(dx_mm, dy_mm))
+                diode.Move(pcbnew.VECTOR2I_MM(dx_mm, dy_mm))
 
                 if self.params['diode']['flip']:
                     diode.Flip(diode.GetCenter(), False)
@@ -196,11 +196,11 @@ class KeyboardLayouter(pcbnew.ActionPlugin):
         if self.params['led']['move']:
             led = self.board.FindFootprintByReference(self.__led_ref(ref_id))
             if led is not None:
-                led.SetPosition(pcbnew.wxPointMM(x_mm, y_mm))
+                led.SetPosition(pcbnew.VECTOR2I_MM(x_mm, y_mm))
                 lx_mm, ly_mm = self.__rotate(r,
                                              self.params['led']['offset_x_mm'],
                                              self.params['led']['offset_y_mm'])
-                led.Move(pcbnew.wxPointMM(lx_mm, ly_mm))
+                led.Move(pcbnew.VECTOR2I_MM(lx_mm, ly_mm))
                 if self.params['led']['flip']:
                     led.Flip(led.GetCenter(), False)
                 led.SetOrientationDegrees(r)
