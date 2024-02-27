@@ -317,7 +317,7 @@ class KeyboardLayouter(pcbnew.ActionPlugin):
 
                 panel_offset_x_mm = wx.Panel(self, wx.ID_ANY)
                 text_offset_x_mm = wx.StaticText(panel_offset_x_mm, wx.ID_ANY, 'Offset x[mm]:')
-                textctrl_offset_x_mm = wx.TextCtrl(panel_offset_x_mm, wx.ID_ANY)
+                textctrl_offset_x_mm = wx.TextCtrl(panel_offset_x_mm, wx.ID_ANY, size=(80, -1))
                 set_initial_textctrl(textctrl_offset_x_mm,
                                      params['diode']['move'],
                                      params['diode']['offset_x_mm'])
@@ -329,7 +329,7 @@ class KeyboardLayouter(pcbnew.ActionPlugin):
 
                 panel_offset_y_mm = wx.Panel(self, wx.ID_ANY)
                 text_offset_y_mm = wx.StaticText(panel_offset_y_mm, wx.ID_ANY, 'Offset y[mm]:')
-                textctrl_offset_y_mm = wx.TextCtrl(panel_offset_y_mm, wx.ID_ANY)
+                textctrl_offset_y_mm = wx.TextCtrl(panel_offset_y_mm, wx.ID_ANY, size=(80, -1))
                 set_initial_textctrl(textctrl_offset_y_mm,
                                      params['diode']['move'],
                                      params['diode']['offset_y_mm'])
@@ -380,7 +380,7 @@ class KeyboardLayouter(pcbnew.ActionPlugin):
 
                 panel_offset_x_mm = wx.Panel(self, wx.ID_ANY)
                 text_offset_x_mm = wx.StaticText(panel_offset_x_mm, wx.ID_ANY, 'Offset x[mm]:')
-                textctrl_offset_x_mm = wx.TextCtrl(panel_offset_x_mm, wx.ID_ANY)
+                textctrl_offset_x_mm = wx.TextCtrl(panel_offset_x_mm, wx.ID_ANY, size=(80, -1))
                 set_initial_textctrl(textctrl_offset_x_mm,
                                      params['led']['move'],
                                      params['led']['offset_x_mm'])
@@ -392,7 +392,7 @@ class KeyboardLayouter(pcbnew.ActionPlugin):
 
                 panel_offset_y_mm = wx.Panel(self, wx.ID_ANY)
                 text_offset_y_mm = wx.StaticText(panel_offset_y_mm, wx.ID_ANY, 'Offset y[mm]:')
-                textctrl_offset_y_mm = wx.TextCtrl(panel_offset_y_mm, wx.ID_ANY)
+                textctrl_offset_y_mm = wx.TextCtrl(panel_offset_y_mm, wx.ID_ANY, size=(80, -1))
                 set_initial_textctrl(textctrl_offset_y_mm,
                                      params['led']['move'],
                                      params['led']['offset_y_mm'])
