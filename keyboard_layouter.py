@@ -5,7 +5,7 @@ import math
 import sys
 import traceback
 
-SWITCH_REF_PREFIX = 'SW'
+SWITCH_REF_PREFIX = 'MX'
 DIODE_REF_PREFIX = 'D'
 LED_REF_PREFIX = 'LED'
 KEY_UNIT_SIZE_MM = 19.05
@@ -19,6 +19,7 @@ KEY_OFFSET = {
     '2.25': 11.9806,  # 23.971
     '2.75': 16.669,  # 28.734
     '6.25': 50.006,  # 62.071
+    '7': 57.149 # 69.214,
 }
 
 KEY_ORIGIN = {
@@ -31,6 +32,7 @@ KEY_ORIGIN = {
     ('2.25', '1'): (23.971, 4.445),
     ('2.75', '1'): (28.734, 4.445),
     ('6.25', '1'): (62.071, 4.445),
+    ('7', '1'): (69.214, 4.445),
 }
 
 DEFAULT_PARAMS = {
