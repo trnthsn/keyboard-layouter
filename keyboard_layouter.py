@@ -47,9 +47,10 @@ DEFAULT_PARAMS = {
     },
     'diode': {
         'move': False,
-        'offset_x_mm': '0',  # -8.6725
-        'offset_y_mm': '0',  # 8.59
+        'offset_x_mm': '3.099',  # -8.6725
+        'offset_y_mm': '1.5',  # 8.59
         'flip': False,
+        'rotation': '90',
     },
     'led': {
         'move': False,
@@ -195,7 +196,7 @@ class KeyboardLayouter(pcbnew.ActionPlugin):
                 diode.Move(pcbnew.VECTOR2I_MM(dx_mm, dy_mm))
 
                 if self.params['diode']['flip']:
-                    diode.Flip(diode.GetCenter(), False)
+                    diode.Flip(diode.GetCenter(), True)
                 diode.SetOrientationDegrees(r + diode_rotation)  # Apply the rotation from input
 
         if self.params['led']['move']:
