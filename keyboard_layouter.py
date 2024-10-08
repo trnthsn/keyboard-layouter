@@ -5,7 +5,7 @@ import math
 import sys
 import traceback
 
-SWITCH_REF_PREFIX = 'MX'
+# Removed the global SWITCH_REF_PREFIX
 DIODE_REF_PREFIX = 'D'
 LED_REF_PREFIX = 'LED'
 KEY_UNIT_SIZE_MM = 19.05
@@ -19,7 +19,7 @@ KEY_OFFSET = {
     '2.25': 11.9806,  # 23.971
     '2.75': 16.669,  # 28.734
     '6.25': 50.006,  # 62.071
-    '7': 57.149 # 69.214,
+    '7': 57.149  # 69.214
 }
 
 KEY_ORIGIN = {
@@ -40,6 +40,7 @@ DEFAULT_PARAMS = {
         'file': '',
         'data': [],
     },
+    'switch_ref_prefix': 'MX',  # Added switch_ref_prefix with default value "MX"
     'switch': {
         'move': True,
         'reverse': False,
@@ -97,7 +98,7 @@ class KeyboardLayouter(pcbnew.ActionPlugin):
         reset_x = reset_y = 0
         for y, row in enumerate(self.params['json']['data']):
             for element in row:
-                if type(element) is dict:
+                if isinstance(element, dict):
                     r = element.get('r')
                     rx = element.get('rx')
                     ry = element.get('ry')
@@ -143,9 +144,8 @@ class KeyboardLayouter(pcbnew.ActionPlugin):
                 '%s is ( w, h )=( %s, %s ). This size is not applicable.' % (self.__sw_ref(ref_id), w, h)
             )
 
-    @staticmethod
-    def __sw_ref(ref_id):
-        return '%s%s' % (SWITCH_REF_PREFIX, ref_id)
+    def __sw_ref(self, ref_id):
+        return '%s%s' % (self.params['switch_ref_prefix'], ref_id)
 
     @staticmethod
     def __diode_ref(ref_id):
@@ -165,6 +165,9 @@ class KeyboardLayouter(pcbnew.ActionPlugin):
     def __move_parts(self, ref_id, props):
         x, y, w, h = props['x'], props['y'], str(props['w']), str(props['h'])
         r, rx, ry = -props['r'], props['rx'], props['ry']
+        
+        # Get the diode rotation from params
+        diode_rotation = float(self.params['diode'].get('rotation', 0))
 
         x_mm = KEY_UNIT_SIZE_MM * x + KEY_OFFSET.get(w, 0)
         y_mm = KEY_UNIT_SIZE_MM * y + KEY_OFFSET.get(h, 0)
@@ -187,21 +190,21 @@ class KeyboardLayouter(pcbnew.ActionPlugin):
             if diode is not None:
                 diode.SetPosition(pcbnew.VECTOR2I_MM(x_mm, y_mm))
                 dx_mm, dy_mm = self.__rotate(r,
-                                             self.params['diode']['offset_x_mm'],
-                                             self.params['diode']['offset_y_mm'])
+                                            self.params['diode']['offset_x_mm'],
+                                            self.params['diode']['offset_y_mm'])
                 diode.Move(pcbnew.VECTOR2I_MM(dx_mm, dy_mm))
 
                 if self.params['diode']['flip']:
                     diode.Flip(diode.GetCenter(), False)
-                diode.SetOrientationDegrees(r)
+                diode.SetOrientationDegrees(r + diode_rotation)  # Apply the rotation from input
 
         if self.params['led']['move']:
             led = self.board.FindFootprintByReference(self.__led_ref(ref_id))
             if led is not None:
                 led.SetPosition(pcbnew.VECTOR2I_MM(x_mm, y_mm))
                 lx_mm, ly_mm = self.__rotate(r,
-                                             self.params['led']['offset_x_mm'],
-                                             self.params['led']['offset_y_mm'])
+                                            self.params['led']['offset_x_mm'],
+                                            self.params['led']['offset_y_mm'])
                 led.Move(pcbnew.VECTOR2I_MM(lx_mm, ly_mm))
                 if self.params['led']['flip']:
                     led.Flip(led.GetCenter(), False)
@@ -262,6 +265,23 @@ class KeyboardLayouter(pcbnew.ActionPlugin):
                 layout.Add(button, flag=wx.ALIGN_CENTER | wx.LEFT, border=MARGIN_PIX)
                 self.SetSizer(layout)
 
+        class SwitchRefPrefixPanel(wx.Panel):
+            def __init__(self, parent, params):
+                def textctrl_handler(_):
+                    params['switch_ref_prefix'] = textctrl.GetValue()
+
+                super(SwitchRefPrefixPanel, self).__init__(parent, wx.ID_ANY)
+
+                label = wx.StaticText(self, wx.ID_ANY, 'Switch Ref Prefix:')
+                textctrl = wx.TextCtrl(self, wx.ID_ANY, size=(80, -1))
+                set_initial_textctrl(textctrl, True, params['switch_ref_prefix'])
+                textctrl.Bind(wx.EVT_TEXT, textctrl_handler)
+
+                layout = wx.BoxSizer(wx.HORIZONTAL)
+                layout.Add(label, flag=wx.ALIGN_CENTER_VERTICAL)
+                layout.Add(textctrl, flag=wx.ALIGN_CENTER_VERTICAL | wx.LEFT, border=MARGIN_PIX)
+                self.SetSizer(layout)
+
         class SwitchPanel(wx.Panel):
             def __init__(self, parent):
                 def checkbox_move_handler(_):
@@ -289,6 +309,7 @@ class KeyboardLayouter(pcbnew.ActionPlugin):
                 layout.Add(checkbox_reverse, flag=wx.LEFT, border=INDENT_PIX)
                 self.SetSizer(layout)
 
+        
         class DiodePanel(wx.Panel):
             def __init__(self, parent):
                 def checkbox_move_handler(_):
@@ -297,10 +318,12 @@ class KeyboardLayouter(pcbnew.ActionPlugin):
                         textctrl_offset_x_mm.Enable()
                         textctrl_offset_y_mm.Enable()
                         checkbox_flip.Enable()
+                        textctrl_rotation.Enable()  # Enable rotation text control
                     else:
                         textctrl_offset_x_mm.Disable()
                         textctrl_offset_y_mm.Disable()
                         checkbox_flip.Disable()
+                        textctrl_rotation.Disable()  # Disable rotation text control
 
                 def textctrl_offset_x_mm_handler(_):
                     params['diode']['offset_x_mm'] = textctrl_offset_x_mm.GetValue()
@@ -311,35 +334,53 @@ class KeyboardLayouter(pcbnew.ActionPlugin):
                 def checkbox_flip_handler(_):
                     params['diode']['flip'] = checkbox_flip.GetValue()
 
+                def textctrl_rotation_handler(_):
+                    params['diode']['rotation'] = textctrl_rotation.GetValue()  # Update rotation value
+
                 super(DiodePanel, self).__init__(parent, wx.ID_ANY)
 
                 checkbox_move = wx.CheckBox(self, wx.ID_ANY, 'Diode')
                 set_initial_checkbox(checkbox_move, True, params['diode']['move'])
                 checkbox_move.Bind(wx.EVT_CHECKBOX, checkbox_move_handler)
 
+                # Existing offset x input
                 panel_offset_x_mm = wx.Panel(self, wx.ID_ANY)
                 text_offset_x_mm = wx.StaticText(panel_offset_x_mm, wx.ID_ANY, 'Offset x[mm]:')
                 textctrl_offset_x_mm = wx.TextCtrl(panel_offset_x_mm, wx.ID_ANY, size=(80, -1))
                 set_initial_textctrl(textctrl_offset_x_mm,
-                                     params['diode']['move'],
-                                     params['diode']['offset_x_mm'])
+                                    params['diode']['move'],
+                                    params['diode']['offset_x_mm'])
                 textctrl_offset_x_mm.Bind(wx.EVT_TEXT, textctrl_offset_x_mm_handler)
                 layout_offset_x_mm = wx.BoxSizer(wx.HORIZONTAL)
                 layout_offset_x_mm.Add(text_offset_x_mm, flag=wx.ALIGN_CENTER)
                 layout_offset_x_mm.Add(textctrl_offset_x_mm, flag=wx.ALIGN_CENTER | wx.LEFT, border=MARGIN_PIX)
                 panel_offset_x_mm.SetSizer(layout_offset_x_mm)
 
+                # Existing offset y input
                 panel_offset_y_mm = wx.Panel(self, wx.ID_ANY)
                 text_offset_y_mm = wx.StaticText(panel_offset_y_mm, wx.ID_ANY, 'Offset y[mm]:')
                 textctrl_offset_y_mm = wx.TextCtrl(panel_offset_y_mm, wx.ID_ANY, size=(80, -1))
                 set_initial_textctrl(textctrl_offset_y_mm,
-                                     params['diode']['move'],
-                                     params['diode']['offset_y_mm'])
+                                    params['diode']['move'],
+                                    params['diode']['offset_y_mm'])
                 textctrl_offset_y_mm.Bind(wx.EVT_TEXT, textctrl_offset_y_mm_handler)
                 layout_offset_y_mm = wx.BoxSizer(wx.HORIZONTAL)
                 layout_offset_y_mm.Add(text_offset_y_mm, flag=wx.ALIGN_CENTER)
                 layout_offset_y_mm.Add(textctrl_offset_y_mm, flag=wx.ALIGN_CENTER | wx.LEFT, border=MARGIN_PIX)
                 panel_offset_y_mm.SetSizer(layout_offset_y_mm)
+
+                # New rotation input
+                panel_rotation = wx.Panel(self, wx.ID_ANY)
+                text_rotation = wx.StaticText(panel_rotation, wx.ID_ANY, 'Rotation [degrees]:')
+                textctrl_rotation = wx.TextCtrl(panel_rotation, wx.ID_ANY, size=(80, -1))
+                set_initial_textctrl(textctrl_rotation,
+                                    params['diode']['move'],
+                                    params.get('diode', {}).get('rotation', '0'))  # Default to 0 if not set
+                textctrl_rotation.Bind(wx.EVT_TEXT, textctrl_rotation_handler)
+                layout_rotation = wx.BoxSizer(wx.HORIZONTAL)
+                layout_rotation.Add(text_rotation, flag=wx.ALIGN_CENTER)
+                layout_rotation.Add(textctrl_rotation, flag=wx.ALIGN_CENTER | wx.LEFT, border=MARGIN_PIX)
+                panel_rotation.SetSizer(layout_rotation)
 
                 checkbox_flip = wx.CheckBox(self, wx.ID_ANY, 'Flip')
                 set_initial_checkbox(checkbox_flip, False, params['diode']['move'])
@@ -349,6 +390,7 @@ class KeyboardLayouter(pcbnew.ActionPlugin):
                 layout.Add(checkbox_move)
                 layout.Add(panel_offset_x_mm, flag=wx.LEFT, border=INDENT_PIX)
                 layout.Add(panel_offset_y_mm, flag=wx.LEFT, border=INDENT_PIX)
+                layout.Add(panel_rotation, flag=wx.LEFT, border=INDENT_PIX)  # Add rotation panel
                 layout.Add(checkbox_flip, flag=wx.LEFT, border=INDENT_PIX)
                 self.SetSizer(layout)
 
@@ -459,7 +501,7 @@ class KeyboardLayouter(pcbnew.ActionPlugin):
                     json_data = json.load(f)
 
                     # remove keyboard metadata
-                    if type(json_data[0]) is dict:
+                    if isinstance(json_data[0], dict):
                         json_data = json_data[1:]
                 return json_data
 
@@ -470,6 +512,7 @@ class KeyboardLayouter(pcbnew.ActionPlugin):
                 root_panel = wx.Panel(self, wx.ID_ANY)
 
                 file_panel = FilePanel(root_panel)
+                switch_ref_prefix_panel = SwitchRefPrefixPanel(root_panel, params)  # Added panel
                 switch_panel = SwitchPanel(root_panel)
                 diode_panel = DiodePanel(root_panel)
                 led_panel = LedPanel(root_panel)
@@ -477,6 +520,7 @@ class KeyboardLayouter(pcbnew.ActionPlugin):
 
                 root_layout = wx.BoxSizer(wx.VERTICAL)
                 root_layout.Add(file_panel, 0, wx.GROW | wx.ALL, border=MARGIN_PIX)
+                root_layout.Add(switch_ref_prefix_panel, 0, wx.GROW | wx.ALL, border=MARGIN_PIX)  # Add to layout
                 root_layout.Add(switch_panel, 0, wx.GROW | wx.ALL, border=MARGIN_PIX)
                 root_layout.Add(diode_panel, 0, wx.GROW | wx.ALL, border=MARGIN_PIX)
                 root_layout.Add(led_panel, 0, wx.GROW | wx.ALL, border=MARGIN_PIX)
@@ -491,4 +535,3 @@ class KeyboardLayouter(pcbnew.ActionPlugin):
 
 
 KeyboardLayouter().register()
-
