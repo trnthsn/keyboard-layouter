@@ -49,7 +49,7 @@ DEFAULT_PARAMS = {
         'move': False,
         'offset_x_mm': '3.099',  # -8.6725
         'offset_y_mm': '1.5',  # 8.59
-        'flip': False,
+        'flip': True,
         'rotation': '90',
     },
     'led': {
