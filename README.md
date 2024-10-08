@@ -53,6 +53,7 @@ Supported switch footprints are Cherry MX in [kicad-footprints/Button_Switch_Key
 - 2.25u (2.25 x 1)
 - 2.75u (2.75 x 1)
 - 6.25u (6.25 x 1)
+- 7.00u (7 x 1)
 - ISO Enter
 
 ## License
