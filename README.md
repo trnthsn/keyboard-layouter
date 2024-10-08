@@ -8,7 +8,7 @@ This plugin places switch footprints in the location specified by JSON of
 [Keyboard Layout Editor](http://www.keyboard-layout-editor.com/).
 
 I have confirmed that it works with pcbnew version (7.0.0) release build on Windows.\
-8.0.0 is probably fine.
+8.99 Nightly build is probably fine.
 
 ![demo](https://raw.githubusercontent.com/yskoht/keyboard-layouter/images/demo.gif)
 
@@ -16,7 +16,7 @@ I have confirmed that it works with pcbnew version (7.0.0) release build on Wind
 
 Download [keyboard_layouter.py](https://github.com/yskoht/keyboard-layouter/blob/master/keyboard_layouter.py) and put it to the following directory:
 
-- Windows: `%APPDATA%/Roaming/kicad/scripting/plugins`
+- Windows: `%USERPROFILE%\Documents\KiCad\8.99\scripting\plugins`
 - macOS: `~/Library/Application Support/kicad/scripting/plugins` or `~/Library/Preferences/kicad/scripting/plugins`
 - Linux: `~/.kicad/scripting/plugins` or `~/.kicad_plugins`
 
